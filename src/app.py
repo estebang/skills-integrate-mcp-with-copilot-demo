@@ -8,16 +8,29 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 import os
 from pathlib import Path
+import uuid
+from datetime import datetime
 
 app = FastAPI(title="Mergington High School API",
-              description="API for viewing and signing up for extracurricular activities")
+              description="API for viewing and signing up for extracurricular activities and location-based meetups")
 
 # Mount the static files directory
 current_dir = Path(__file__).parent
 app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
+
+# Pydantic models for meetups
+class MeetupCreate(BaseModel):
+    name: str
+    description: str
+    location: str
+    schedule: str
+    max_participants: int
+    category: str  # academic or extra-curricular
+    organizer_email: str
 
 # In-memory activity database
 activities = {
@@ -77,6 +90,32 @@ activities = {
     }
 }
 
+# In-memory meetups database
+meetups = {
+    "meetup_001": {
+        "name": "Study Group - Calculus",
+        "description": "Weekly calculus study sessions for advanced students",
+        "location": "San Francisco",
+        "schedule": "Saturdays, 2:00 PM - 4:00 PM",
+        "max_participants": 8,
+        "category": "academic",
+        "organizer_email": "sarah@mergington.edu",
+        "participants": ["sarah@mergington.edu", "alex@mergington.edu"],
+        "created_at": "2024-01-15T10:00:00"
+    },
+    "meetup_002": {
+        "name": "Photography Walk",
+        "description": "Explore local landmarks and practice photography techniques",
+        "location": "Oakland",
+        "schedule": "Sundays, 10:00 AM - 12:00 PM",
+        "max_participants": 12,
+        "category": "extra-curricular",
+        "organizer_email": "mike@mergington.edu",
+        "participants": ["mike@mergington.edu"],
+        "created_at": "2024-01-20T15:30:00"
+    }
+}
+
 
 @app.get("/")
 def root():
@@ -130,3 +169,123 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+# Meetup endpoints
+@app.get("/meetups")
+def get_meetups(location: str = None):
+    """Get all meetups, optionally filtered by location"""
+    if location:
+        filtered_meetups = {
+            meetup_id: meetup_data 
+            for meetup_id, meetup_data in meetups.items()
+            if meetup_data["location"].lower() == location.lower()
+        }
+        return filtered_meetups
+    return meetups
+
+
+@app.post("/meetups")
+def create_meetup(meetup: MeetupCreate):
+    """Create a new meetup"""
+    # Generate unique ID
+    meetup_id = f"meetup_{str(uuid.uuid4())[:8]}"
+    
+    # Create meetup data
+    meetup_data = {
+        "name": meetup.name,
+        "description": meetup.description,
+        "location": meetup.location,
+        "schedule": meetup.schedule,
+        "max_participants": meetup.max_participants,
+        "category": meetup.category,
+        "organizer_email": meetup.organizer_email,
+        "participants": [meetup.organizer_email],  # Organizer automatically joins
+        "created_at": datetime.now().isoformat()
+    }
+    
+    # Add to meetups database
+    meetups[meetup_id] = meetup_data
+    
+    return {"message": f"Created meetup '{meetup.name}'", "meetup_id": meetup_id}
+
+
+@app.post("/meetups/{meetup_id}/join")
+def join_meetup(meetup_id: str, email: str):
+    """Join a meetup"""
+    # Validate meetup exists
+    if meetup_id not in meetups:
+        raise HTTPException(status_code=404, detail="Meetup not found")
+    
+    # Get the specific meetup
+    meetup = meetups[meetup_id]
+    
+    # Validate user is not already joined
+    if email in meetup["participants"]:
+        raise HTTPException(
+            status_code=400,
+            detail="User is already part of this meetup"
+        )
+    
+    # Check if meetup is full
+    if len(meetup["participants"]) >= meetup["max_participants"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Meetup is full"
+        )
+    
+    # Add user
+    meetup["participants"].append(email)
+    return {"message": f"Joined meetup '{meetup['name']}'"}
+
+
+@app.delete("/meetups/{meetup_id}/leave")
+def leave_meetup(meetup_id: str, email: str):
+    """Leave a meetup"""
+    # Validate meetup exists
+    if meetup_id not in meetups:
+        raise HTTPException(status_code=404, detail="Meetup not found")
+    
+    # Get the specific meetup
+    meetup = meetups[meetup_id]
+    
+    # Validate user is part of the meetup
+    if email not in meetup["participants"]:
+        raise HTTPException(
+            status_code=400,
+            detail="User is not part of this meetup"
+        )
+    
+    # Don't allow organizer to leave their own meetup
+    if email == meetup["organizer_email"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Organizer cannot leave their own meetup"
+        )
+    
+    # Remove user
+    meetup["participants"].remove(email)
+    return {"message": f"Left meetup '{meetup['name']}'"}
+
+
+@app.delete("/meetups/{meetup_id}")
+def delete_meetup(meetup_id: str, email: str):
+    """Delete a meetup (only organizer can delete)"""
+    # Validate meetup exists
+    if meetup_id not in meetups:
+        raise HTTPException(status_code=404, detail="Meetup not found")
+    
+    # Get the specific meetup
+    meetup = meetups[meetup_id]
+    
+    # Validate user is the organizer
+    if email != meetup["organizer_email"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the organizer can delete this meetup"
+        )
+    
+    # Delete meetup
+    meetup_name = meetup["name"]
+    del meetups[meetup_id]
+    return {"message": f"Deleted meetup '{meetup_name}'"}

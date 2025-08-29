@@ -192,6 +192,117 @@ button:hover {
   display: none;
 }
 
+/* Meetup-specific styles */
+.meetup-card {
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #1a237e;
+}
+
+.meetup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.meetup-header h4 {
+  margin: 0;
+  color: #0066cc;
+}
+
+.category-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.category-badge.academic {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.category-badge.extra-curricular {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.meetup-controls {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+}
+
+.meetup-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.join-meetup-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.join-meetup-btn:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.join-meetup-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.delete-meetup-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-meetup-btn:hover {
+  background-color: #da190b;
+}
+
+.leave-btn {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.leave-btn:hover {
+  background-color: #f57c00;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  resize: vertical;
+  min-height: 80px;
+  font-family: Arial, sans-serif;
+}
+
 footer {
   text-align: center;
   margin-top: 30px;

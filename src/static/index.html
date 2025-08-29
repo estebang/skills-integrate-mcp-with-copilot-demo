@@ -9,15 +9,32 @@
   <body>
     <header>
       <h1>Mergington High School</h1>
-      <h2>Extracurricular Activities</h2>
+      <h2>Activities & Community Meetups</h2>
     </header>
 
     <main>
       <section id="activities-container">
-        <h3>Available Activities</h3>
+        <h3>School Activities</h3>
         <div id="activities-list">
           <!-- Activities will be loaded here -->
           <p>Loading activities...</p>
+        </div>
+      </section>
+
+      <section id="meetups-container">
+        <h3>Community Meetups</h3>
+        <div class="meetup-controls">
+          <div class="form-group">
+            <label for="location-filter">Filter by Location:</label>
+            <select id="location-filter">
+              <option value="">All Locations</option>
+              <!-- Location options will be loaded here -->
+            </select>
+          </div>
+        </div>
+        <div id="meetups-list">
+          <!-- Meetups will be loaded here -->
+          <p>Loading meetups...</p>
         </div>
       </section>
 
@@ -38,6 +55,46 @@
           <button type="submit">Sign Up</button>
         </form>
         <div id="message" class="hidden"></div>
+      </section>
+
+      <section id="create-meetup-container">
+        <h3>Create a New Meetup</h3>
+        <form id="create-meetup-form">
+          <div class="form-group">
+            <label for="meetup-organizer-email">Your Email:</label>
+            <input type="email" id="meetup-organizer-email" required placeholder="your-email@mergington.edu" />
+          </div>
+          <div class="form-group">
+            <label for="meetup-name">Meetup Name:</label>
+            <input type="text" id="meetup-name" required placeholder="e.g., Study Group - Physics" />
+          </div>
+          <div class="form-group">
+            <label for="meetup-description">Description:</label>
+            <textarea id="meetup-description" required placeholder="Describe your meetup..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="meetup-location">Location/City:</label>
+            <input type="text" id="meetup-location" required placeholder="e.g., San Francisco" />
+          </div>
+          <div class="form-group">
+            <label for="meetup-schedule">Schedule:</label>
+            <input type="text" id="meetup-schedule" required placeholder="e.g., Saturdays, 2:00 PM - 4:00 PM" />
+          </div>
+          <div class="form-group">
+            <label for="meetup-max-participants">Max Participants:</label>
+            <input type="number" id="meetup-max-participants" required min="2" max="50" value="10" />
+          </div>
+          <div class="form-group">
+            <label for="meetup-category">Category:</label>
+            <select id="meetup-category" required>
+              <option value="">-- Select category --</option>
+              <option value="academic">Academic</option>
+              <option value="extra-curricular">Extra-curricular</option>
+            </select>
+          </div>
+          <button type="submit">Create Meetup</button>
+        </form>
+        <div id="meetup-message" class="hidden"></div>
       </section>
     </main>
 
